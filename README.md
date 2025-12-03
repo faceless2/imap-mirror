@@ -1,6 +1,6 @@
 # IMAP Mirror
 
-A Java package to mirror messages from an IMAP server locally. Supports OAUTH2, so works with GMail, and has no dependencies.
+A Java package to mirror messages from an IMAP server locally. Supports OAuth2, so works with GMail, and has no dependencies.
 Designed to work with massive mailboxes, to cope with messages duplicated in multiple folders, and to be interrupted.
 
 ## Usage
@@ -45,6 +45,6 @@ folder.
 
 Downloads can be interrupted and will be picked up where they left off.
 
-OAUTH2 authorization data is stored in a JSON `.authority` file in the directory for each account, and may be encrypted.
+OAuth2 authorization data is stored in a JSON `.authority` file in the directory for each account, and may be encrypted.
 The message index for each folder is stored in a JSON `.imap` file in each folder's directory; if it's deleted the
 index will need to be be downloaded again, but messages themselves will never be downloaded more than once.
