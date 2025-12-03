@@ -500,7 +500,9 @@ public class Mirror {
         properties.put("mail.imaps.sasl.enable", "true");
 
         oauth2config = new HashMap<String,String>();
-        oauth2config.put("debug", "true");
+        if (json.booleanValue("debug")) {
+            oauth2config.put("debug", "true");
+        }
         oauth2config.put("server", json.stringValue("server"));
         oauth2config.put("auth_uri", json.stringValue("auth_uri"));
         oauth2config.put("token_uri", json.stringValue("token_uri"));
