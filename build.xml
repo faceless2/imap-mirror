@@ -1,0 +1,85 @@
+<project name="imap-mirror" default="default" xmlns:if="ant:if">
+  <property name="build.sysclasspath" value="ignore"/>
+  <property file="build.properties"/>
+
+  <property name="description" value="IMAP Mirror"/>
+  <property name="dist" value="dist"/>		        <!-- where to build the Jars -->
+  <property name="classes.main" value="build/main"/>	<!-- where to compile the classes -->
+  <property name="docs" value="docs"/>
+  <property name="src.main" value="src/main"/>
+  <property name="jar.main" value="${dist}/imap-mirror-${version}.jar"/>
+  <property name="jar.combined" value="${dist}/imap-mirror-all-${version}.jar"/>
+
+  <path id="path.build">
+    <fileset dir="lib" includes="*.jar"/>
+  </path>
+
+  <target name="clean">
+    <delete dir="${classes.main}" />
+    <delete dir="${dist}" />
+    <delete dir="${docs}" />
+  </target>
+
+  <target name="build">
+    <mkdir dir="${classes.main}"/>
+    <mkdir dir="${dist}"/>
+    <javac encoding="utf-8" debug="true" source="8" target="8" destdir="${classes.main}">
+      <src path="${src.main}"/>
+      <compilerarg value="-Xlint:unchecked"/>
+      <compilerarg value="-Xlint:rawtypes"/>
+      <compilerarg value="-Xlint:deprecation"/>
+      <compilerarg value="-Xlint:finally"/>
+      <compilerarg value="-Xlint:overrides"/>
+      <classpath refid="path.build" />
+    </javac>
+    <copy todir="${classes.main}">
+      <fileset dir="${src.main}">
+        <exclude name="**/*.java"/>
+      </fileset>
+    </copy>
+    <jar jarfile="${jar.main}" update="false">
+      <fileset dir="${classes.main}" />
+      <manifest>
+        <attribute name="Build-By" value="${user.name}/${java.version}"/>
+        <attribute name="Build-Date" value="${ISONOW}"/>
+        <attribute name="Main-Class" value="com.bfo.imap.Main"/>
+        <attribute name="Implementation-Title" value="${ant.project.name}"/>
+        <attribute name="Implementation-Version" value="${buildversion}"/>
+      </manifest>
+    </jar>
+
+    <jar jarfile="${jar.combined}" update="false">
+      <fileset dir="${classes.main}" />
+      <zipgroupfileset file="lib/bfojson-2.1.jar"/>
+      <zipgroupfileset file="lib/angus-mail-2.0.2.jar"/>
+      <zipgroupfileset file="lib/jakarta.activation-api-2.1.3.jar"/>
+      <zipgroupfileset file="lib/jakarta.mail-api-2.1.3.jar"/>
+      <manifest>
+        <attribute name="Build-By" value="${user.name}/${java.version}"/>
+        <attribute name="Build-Date" value="${ISONOW}"/>
+        <attribute name="Main-Class" value="com.bfo.imap.Main"/>
+        <attribute name="Implementation-Title" value="${ant.project.name}"/>
+        <attribute name="Implementation-Version" value="${buildversion}"/>
+      </manifest>
+    </jar>
+  </target>
+
+  <target name="javadoc">
+    <mkdir dir="${docs}"/>
+    <condition property="javadoc.additionalparam" value="-notimestamp"><matches pattern="^1.8" string="${java.version}"/></condition>
+    <property name="javadoc.additionalparam" value="-notimestamp --ignore-source-errors"/>
+
+    <javadoc destdir="${docs}" access="public" author="false" version="false" windowtitle="${description} ${version}" charset="UTF-8" encoding="UTF-8" docencoding="UTF-8" additionalparam="${javadoc.additionalparam}" use="true" breakiterator="true">
+      <sourcefiles>
+        <fileset dir="${src.main}"/>
+      </sourcefiles>
+      <doctitle><![CDATA[${description} ${version}]]></doctitle>
+      <header><![CDATA[${description} ${version}]]></header>
+      <link href="https://faceless2.github.io/json/docs/"/>
+      <link href="https://docs.oracle.com/en/java/javase/11/docs/api/"/>
+    </javadoc>
+  </target>
+
+  <target name="default" depends="build"></target>
+
+</project>

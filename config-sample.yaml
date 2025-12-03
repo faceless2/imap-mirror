@@ -1,0 +1,32 @@
+# This file configures the IMAP mirror service with a list of accounts.
+# Every account must have
+#
+#   directory   - the directory where the downloaded mail will be stored
+#   email       - the email address for the account
+#
+# and other keys depend on the "type"
+# 
+#  for "gmail", required keys are "redirect_uri", "client_id" and "client_secret"
+#  for "generic", required keys are "server", and "password"
+#
+# if oauth2 authorization tokens are to be saved encrypted, specify "auth_password"
+
+accounts:
+  gmail:
+    directory: /Users/user/mail-gmail   # Where to store the mail. Required
+    #auth_password: "password"          # If authorization data is to be saved encrypted, a password to access it. Optional
+    type: gmail
+    email: test@test.com
+    # Next three are the minimum required to access gmail accounts
+    redirect_uri: http://127.0.0.1:4567/oauth
+    client_id: xxxxxxxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com
+    client_secret: xxxxxxxxxxxxxxxxxxxxxxxx
+
+  generic:
+    directory: /Users/user/mail-generic
+    auth_password: "password"
+    email: test@test.com
+    server: imap.test.com
+    tls: true
+    port: 1443
+    password: "secret"
