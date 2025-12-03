@@ -96,7 +96,7 @@ public class Main {
             }
             Mirror mirror = new Mirror(s, this);
             mirror.initialize(root, json);
-            ok |= mirror.process();
+            ok &= mirror.process();
         }
         return ok;
     }

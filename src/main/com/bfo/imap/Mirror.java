@@ -57,7 +57,6 @@ public class Mirror {
         scanExisting();
         Store store = connect();
 
-        boolean done = true;
         Deque<Folder> q = new ArrayDeque<Folder>();
         q.add(store.getDefaultFolder());
         Folder folder;
@@ -119,6 +118,7 @@ public class Mirror {
             sb.append("\"");
         }
         log(sb.toString());
+        boolean done = true;
         for (Map.Entry<Integer,Folder> e : folders) {
             folder = e.getValue();
             if (!processFolder(folder)) {
