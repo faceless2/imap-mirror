@@ -61,15 +61,71 @@ public class Mirror {
         Deque<Folder> q = new ArrayDeque<Folder>();
         q.add(store.getDefaultFolder());
         Folder folder;
+        List<Map.Entry<Integer,Folder>> folders = new ArrayList<>();
         while ((folder = q.pollFirst()) != null) {
+            q.addAll(Arrays.asList(folder.list()));
             if ((folder.getType() & Folder.HOLDS_MESSAGES) != 0) {
-                if (!processFolder(folder)) {
-                    log("Server closed connection");
-                    done = false;
-                    break;
+                String fullName = folder.getFullName();
+                if (config.isList("skip")) {
+                    for (Json j : config.listValue("skip")) {
+                        if (j.isString()) {
+                            String s = j.stringValue();
+                            if (fullName.equals(s) || (s.endsWith(folder.getSeparator() + "*") && fullName.startsWith(s.substring(0, s.length() - 1)))) {
+                                folder = null;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (folder != null) {
+                    int order;
+                    if (config.isList("order")) {
+                        order  = 0;
+                        for (Json j : config.listValue("order")) {
+                            if (j.isString()) {
+                                String s = j.stringValue();
+                                if (s.equals("*") || fullName.equals(s) || (s.endsWith(folder.getSeparator() + "*") && fullName.startsWith(s.substring(0, s.length() - 1)))) {
+                                    break;
+                                }
+                            }
+                            order++;
+                        }
+                    } else {
+                        order = 0;
+                    }
+                    for (int i=folders.size() - 1;i>=0;i--) {
+                        if (folders.get(i).getKey() <= order) {
+                            folders.add(i + 1, new AbstractMap.SimpleEntry<Integer,Folder>(order, folder));
+                            folder = null;
+                            break;
+                        }
+                    }
+                    if (folder != null) {
+                        folders.add(0, new AbstractMap.SimpleEntry<Integer,Folder>(order, folder));
+                    }
                 }
             }
-            q.addAll(Arrays.asList(folder.list()));
+        }
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<Integer,Folder> e : folders) {
+            folder = e.getValue();
+            if (sb.isEmpty()) {
+                sb.append("Preparing to download " + folders.size() + " folders: ");
+            } else {
+                sb.append(", ");
+            }
+            sb.append("\"");
+            sb.append(folder.getFullName());
+            sb.append("\"");
+        }
+        log(sb.toString());
+        for (Map.Entry<Integer,Folder> e : folders) {
+            folder = e.getValue();
+            if (!processFolder(folder)) {
+                log("Server closed connection");
+                done = false;
+                break;
+            }
         }
         store.close();
         return done;
@@ -366,6 +422,10 @@ public class Mirror {
                             tmpPath = null;
                             newCount++;
                             bymsgid.put(cleanMessageId, folderPath);
+                        } catch (IOException e) {
+                            if (e.getCause() instanceof MessagingException) {
+                                throw (MessagingException)e.getCause();
+                            }
                         } finally {
                             if (in != null) in.close();
                             if (out != null) out.close();
@@ -376,6 +436,7 @@ public class Mirror {
                 progress(folderName, oldCount, linkCount, newCount, list.size(), false);
             }
         } catch (FolderClosedException e) {
+            System.out.println();
             // This is normal; gmail in particular has resource limits and boots you out regularly
             return false;
         }
