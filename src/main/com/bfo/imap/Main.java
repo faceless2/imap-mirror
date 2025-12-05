@@ -65,6 +65,10 @@ public class Main {
     Main() {
     }
 
+    int getMaxFileNameLength() {
+        return config.isNumber("max_filename_length") ? config.intValue("max_filename_length") : Integer.MAX_VALUE;
+    }
+
     void configure(Json config) {
         if (config == null || !config.isMap() || !config.isMap("accounts")) {
             throw new IllegalArgumentException("Invalid configuration");

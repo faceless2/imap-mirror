@@ -458,8 +458,30 @@ public class Mirror {
     /**
      * Make a path segment safe to write to the file system.
      */
-    private static String clean(String path) throws UnsupportedEncodingException {
-        return URLEncoder.encode(path, "UTF-8");        // Arbitrary but works.
+    private String clean(String path) {
+        try {
+            String out = URLEncoder.encode(path, "UTF-8");        // Arbitrary but works.
+            int max = main.getMaxFileNameLength() - 4;
+            if (out.length() > max) {
+                MessageDigest digest = MessageDigest.getInstance("SHA-256");
+                byte[] b = digest.digest(path.getBytes("UTF-8"));
+                StringBuilder sb = new StringBuilder(max);
+                sb.append(out.substring(0, Math.max(0, max - 1 - b.length * 2)));
+                if (sb.length() > 0) {
+                    sb.append('-');
+                }
+                for (int i=0;i<b.length;i++) {
+                    sb.append(Integer.toHexString((b[i]>>4)&0xF));
+                    sb.append(Integer.toHexString(b[i]&0xF));
+                }
+                out = sb.toString();
+            }
+            return out;
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     //-------------------------------------------------------------------------------------------

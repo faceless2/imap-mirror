@@ -16,6 +16,7 @@
 #   skip        - a list of folders to skip, may include "*" as wildcard, eg ["Spam", "[Google Mail]/*"]
 #   order       - to prioritise the folders. May include wildcard at the end,e g ["Important", "Work/*", "*"]
 
+max_filename_length:  255                   # Never make a filename longer than this
 accounts:
   gmail:
     directory: /Users/user/mail-gmail   # Where to store the mail. Required
