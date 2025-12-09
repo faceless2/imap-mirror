@@ -407,29 +407,31 @@ public class Mirror {
                     } else {
                         // Message needs to be downloaded
                         MimeMessage message = (MimeMessage)((UIDFolder)folder).getMessageByUID(uid);
-                        Date date = message.getSentDate();
-                        InputStream in = null;
-                        OutputStream out = null;
-                        Path tmpPath = folderPath.resolve(cleanMessageId + ".tmp");
-                        try {
-                            out = Files.newOutputStream(tmpPath);
-                            message.writeTo(out);
-                            out.close();
-                            // Set date of mail file to sent date (unsent messages will be 1970-01-01)
-                            Files.setLastModifiedTime(tmpPath, FileTime.fromMillis(date == null ? 0 : date.getTime()));
-                            Files.setPosixFilePermissions(tmpPath, PosixFilePermissions.fromString("r--r--r--"));
-                            Files.move(tmpPath, messagePath, StandardCopyOption.ATOMIC_MOVE);
-                            tmpPath = null;
-                            newCount++;
-                            bymsgid.put(cleanMessageId, folderPath);
-                        } catch (IOException e) {
-                            if (e.getCause() instanceof MessagingException) {
-                                throw (MessagingException)e.getCause();
+                        if (message != null) {
+                            Date date = message.getSentDate();
+                            InputStream in = null;
+                            OutputStream out = null;
+                            Path tmpPath = folderPath.resolve(cleanMessageId + ".tmp");
+                            try {
+                                out = Files.newOutputStream(tmpPath);
+                                message.writeTo(out);
+                                out.close();
+                                // Set date of mail file to sent date (unsent messages will be 1970-01-01)
+                                Files.setLastModifiedTime(tmpPath, FileTime.fromMillis(date == null ? 0 : date.getTime()));
+                                Files.setPosixFilePermissions(tmpPath, PosixFilePermissions.fromString("r--r--r--"));
+                                Files.move(tmpPath, messagePath, StandardCopyOption.ATOMIC_MOVE);
+                                tmpPath = null;
+                                newCount++;
+                                bymsgid.put(cleanMessageId, folderPath);
+                            } catch (IOException e) {
+                                if (e.getCause() instanceof MessagingException) {
+                                    throw (MessagingException)e.getCause();
+                                }
+                            } finally {
+                                if (in != null) in.close();
+                                if (out != null) out.close();
+                                if (tmpPath != null) Files.delete(tmpPath);
                             }
-                        } finally {
-                            if (in != null) in.close();
-                            if (out != null) out.close();
-                            if (tmpPath != null) Files.delete(tmpPath);
                         }
                     }
                 }
