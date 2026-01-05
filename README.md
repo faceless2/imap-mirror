@@ -48,3 +48,6 @@ Downloads can be interrupted and will be picked up where they left off.
 OAuth2 authorization data is stored in a JSON `.authority` file in the directory for each account, and may be encrypted.
 The message index for each folder is stored in a JSON `.imap` file in each folder's directory; if it's deleted the
 index will need to be be downloaded again, but messages themselves will never be downloaded more than once.
+
+Note that Gmail has a 2GB per day traffic limit as well as other shorter-term limits, so expect the connection to drop fairly frequently. For a full mirror, running from cron every 6 hours or so is an effective strategy.
+
