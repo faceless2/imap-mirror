@@ -51,3 +51,6 @@ index will need to be be downloaded again, but messages themselves will never be
 
 Note that Gmail has a 2GB per day traffic limit as well as other shorter-term limits, so expect the connection to drop fairly frequently. For a full mirror, running from cron every 6 hours or so is an effective strategy.
 
+### Why not use takeout.google.com
+
+Although Google provides a service at https://takeout.google.com to download email in bulk, this will silently corrupt some email. Specifically, all `Content-Type: text/plain` email is assumed to be in UTF-8, so if the `Content-Transfer-Encoding` is 8bit then any high-bytes are assumed to be invalid UTF-8 sequences and are replaced with U+FEFF.
